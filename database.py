@@ -9,8 +9,9 @@ from sqlalchemy.dialects.postgresql import Insert
 
 from db_models import User, Object, SecureMatrix
 
-engine = create_async_engine('postgresql+asyncpg://postgres:post@localhost/mbks_lab1')
 _log = logging.getLogger(__name__)
+engine = create_async_engine('postgresql+asyncpg://postgres:post@localhost/mbks_lab1')
+
 
 class Storage(ABC):
     def __init__(self) -> None:
@@ -63,15 +64,19 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    async def get_object(self, owner_id: int, name: str, uri: str | None) -> str | None:
+    async def object_exists(self, name: str) -> bool:
         pass
 
     @abstractmethod
-    async def set_rights(self, object_id: int, owner_id: int, rights: str = "000") -> None:
+    async def get_object(self, name: str) -> str | None:
         pass
 
     @abstractmethod
-    async def get_rights(self, object_id: int | None, owner_id: int | None) -> Sequence[Row | RowMapping | Any] | None:
+    async def set_rights(self, object_id: int, owner_id: int, rights: str = "1000") -> None:
+        pass
+
+    @abstractmethod
+    async def get_rights(self, object_id: int | None, owner_id: int | None) -> str | None:
         pass
 
 class SQLAlchemyStorage(Storage):
@@ -156,7 +161,25 @@ class SQLAlchemyStorage(Storage):
             .where(Object.owner_id == owner_id and Object.name == name)
         )
 
-    async def set_rights(self, object_id: int, owner_id: int, rights: str = "000") -> None:
+    async def get_object(self, name: str) -> str | None:
+        if self._session is None:
+            raise AssertionError("Storage is not connected")
+        result = await self._session.execute(
+            select(Object.owner_id, Object.name, Object.uri)
+            .where(Object.name == name)
+        )
+        return result.scalar_one_or_none()
+
+    async def object_exists(self, name: str) -> bool:
+        if self._session is None:
+            raise AssertionError("Storage is not connected")
+        result = await self._session.execute(
+            select(Object.id)
+            .where(Object.name == name)
+        )
+        return result.scalar_one_or_none() is not None
+
+    async def set_rights(self, object_id: int, owner_id: int, rights: str = "1000") -> None:
         if self._session is None:
             raise AssertionError("Storage is not connected")
         await self._session.execute(
@@ -168,25 +191,11 @@ class SQLAlchemyStorage(Storage):
             )
         )
 
-    async def get_rights(self, object_id: int | None, owner_id: int | None) -> Sequence[Row | RowMapping | Any] | None:
+    async def get_rights(self, object_id: int | None, owner_id: int | None) -> str | None:
         if self._session is None:
             raise AssertionError("Storage is not connected")
-        result = 0
-        if object_id is None and owner_id is None:
-            raise AssertionError("Не заданы параметры поиска")
-        elif owner_id is None:
-            result = await self._session.execute(
-                select(SecureMatrix.object_id, SecureMatrix.user_id, SecureMatrix.rights)
-                .where(SecureMatrix.object_id == object_id)
-            )
-        elif object_id is None:
-            result = await self._session.execute(
-                select(SecureMatrix.object_id, SecureMatrix.user_id, SecureMatrix.rights)
-                .where(SecureMatrix.user_id == owner_id)
-            )
-        else:
-            result = await self._session.execute(
-                select(SecureMatrix.object_id, SecureMatrix.user_id, SecureMatrix.rights)
-                .where(SecureMatrix.object_id == object_id and SecureMatrix.user_id == owner_id)
-            )
-        return result.scalars().all()
+        result = await self._session.execute(
+            select(SecureMatrix.object_id, SecureMatrix.user_id, SecureMatrix.rights)
+            .where(SecureMatrix.object_id == object_id and SecureMatrix.user_id == owner_id)
+        )
+        return result.scalar_one_or_none()
