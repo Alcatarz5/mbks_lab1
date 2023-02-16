@@ -48,7 +48,7 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    async def get_user(self, name: str | None, role: str | None) -> Sequence[Row | RowMapping | Any] | None:
+    async def get_user(self, name: str | None, role: str | None) -> Sequence[Row | RowMapping | list] | None:
         pass
 
     @abstractmethod
@@ -78,6 +78,7 @@ class Storage(ABC):
     @abstractmethod
     async def get_rights(self, object_id: int | None, owner_id: int | None) -> str | None:
         pass
+
 
 class SQLAlchemyStorage(Storage):
     def __init__(self, session_factory: Callable[[], AsyncSession]) -> None:

@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -14,6 +15,7 @@ class User(Base):
 
     objects = relationship("Object", back_populates="users")
     secure_matrix = relationship("SecureMatrix", back_populates="users")
+
 
 class Object(Base):
     __tablename__ = "objects"
@@ -26,6 +28,7 @@ class Object(Base):
 
     users = relationship("User", back_populates="objects")
     secure_matrix = relationship("SecureMatrix", back_populates="objects")
+
 
 class SecureMatrix(Base):
     __tablename__ = "secure_matrix"
