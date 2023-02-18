@@ -118,20 +118,20 @@ class SQLAlchemyStorage(Storage):
             raise AssertionError("Не заданы параметры поиска")
         elif role is None:
             result = await self._session.execute(
-                select(User.id, User.name, User.role)
+                select(User)
                 .where(User.name == name)
             )
         elif name is None:
             result = await self._session.execute(
-                select(User.id, User.name, User.role)
+                select(User)
                 .where(User.role == role)
             )
         else:
             result = await self._session.execute(
-                select(User.id, User.name, User.role)
+                select(User)
                 .where(User.role == role and User.name == name)
             )
-        return result.scalars().all()
+        return result.scalar_one_or_none()
 
     async def user_exists(self, name: str) -> bool:
         if self._session is None:
@@ -166,7 +166,7 @@ class SQLAlchemyStorage(Storage):
         if self._session is None:
             raise AssertionError("Storage is not connected")
         result = await self._session.execute(
-            select(Object.owner_id, Object.name, Object.uri)
+            select(Object)
             .where(Object.name == name)
         )
         return result.scalar_one_or_none()
@@ -196,7 +196,7 @@ class SQLAlchemyStorage(Storage):
         if self._session is None:
             raise AssertionError("Storage is not connected")
         result = await self._session.execute(
-            select(SecureMatrix.object_id, SecureMatrix.user_id, SecureMatrix.rights)
+            select(SecureMatrix)
             .where(SecureMatrix.object_id == object_id and SecureMatrix.user_id == owner_id)
         )
         return result.scalar_one_or_none()

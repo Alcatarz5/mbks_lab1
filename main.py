@@ -1,20 +1,21 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
 
-from database import Storage, SQLAlchemyStorage, engine
+from command_Interpreter import write_command
+from config import storage
 
-storage: Storage = SQLAlchemyStorage(lambda: AsyncSession(engine))
 
-
-def login(name: str) -> str:
+async def login(name: str) -> None:
     async with storage:
-        if storage.user_exists(name=name):
-            return f"Вы успешно зашли под пользователем {name}"
+        if await storage.user_exists(name=name):
+            print(f"Вы успешно зашли под пользователем {name}")
+            await write_command(user=name)
         else:
-            return "Такого пользователя не существует"
+            print("Такого пользователя не существует")
 
 
 def main():
-    print(list("rgsf"))
+    name = input("Введите имя пользователя \n")
+    asyncio.run(login(name=name))
 
 
 if __name__ == '__main__':

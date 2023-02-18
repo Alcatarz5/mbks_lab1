@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy import Column, Integer, Text, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -36,8 +36,9 @@ class SecureMatrix(Base):
     object_id = Column(Integer, ForeignKey("objects.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    rights = Column(Integer, nullable=False)
+    rights = Column(Text, nullable=False)
 
     objects = relationship("Object", back_populates="secure_matrix")
     users = relationship("User", back_populates="secure_matrix")
 
+    __table_args__ = (PrimaryKeyConstraint(object_id, user_id),)
