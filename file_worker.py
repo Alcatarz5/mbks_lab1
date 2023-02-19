@@ -44,3 +44,10 @@ async def create_object(user: str, object_name: str) -> None:
     user_id = await storage.get_user(name=user, role=None)
     # print(user_id[0])
     await storage.create_object(owner_id=int(user_id[0].id), name=object_name, uri=filepath)
+
+
+async def delete_object(user: str, object_name: str) -> None:
+    filepath = os.path.abspath(object_name + ".txt")
+    user_id = (await storage.get_user(name=user, role=None))[0].id
+    os.remove(filepath)
+    await storage.delete_object(owner_id=int(user_id), name=object_name)

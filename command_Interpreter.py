@@ -1,4 +1,4 @@
-from file_worker import read_file, write_to_file, create_object
+from file_worker import read_file, write_to_file, create_object, delete_object
 from user_worker import add_user
 
 
@@ -8,6 +8,7 @@ def command_help() -> None:
         + "To write in file - write <filename> <text> \n"
         + "To grand rights - grand <filename> <user> <rights in format <**> where 0-deny, 1-accept> \n"
         + "To create file - create <filename> \n"
+        + "To delete file - delete <filename> \n"
         + "To add new user (only for admin) - add <username> <role> \n"
         + "To exit app - exit"
     )
@@ -58,6 +59,8 @@ async def write_command(user: str) -> None:
                 await create_object(user=user, object_name=command[1])
             case "add":
                 await add_user(user=command[1], role=command[2])
+            case "delete":
+                await delete_object(user=user, object_name=command[1])
             case "help":
                 command_help()
             case "exit":
