@@ -1,7 +1,7 @@
 create function insert_into_secure_matrix_object() returns trigger as
 $on_object_create$
 declare
-	object_id int := (select id from objects order by id limit 1);
+	object_id int := (select id from objects order by id desc limit 1);
 	users_ar int[] := (select array_agg(id) from users);
 	x int;
 	user_role text;
@@ -36,7 +36,7 @@ $on_object_create$ language plpgsql;
 create function insert_into_secure_matrix_user() returns trigger as
 $on_user_create$
 declare
-	user_id int := (select id from users order by id limit 1);
+	user_id int := (select id from users order by id desc limit 1);
 	object_ar int[] := (select array_agg(id) from objects);
 	x int;
 begin
