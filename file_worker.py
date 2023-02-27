@@ -73,13 +73,12 @@ async def grand_rights(user: str, target_user: str, object_name: str, rights: st
             if user_rights[2] == '1':
                 if rights[3] == '0':
                     await storage.set_rights(object_id=object_id, user_id=target_user_id, rights=rights)
-                    print(f"Вы успешно изменили права пользователя {target_user}, на объект {object_name}")
+                    print(f"ВSы успешно изменили права пользователя {target_user}, на объект {object_name}")
                 else:
                     await storage.set_rights(object_id=object_id, user_id=target_user_id, rights=rights)
                     await storage.set_rights(object_id=object_id, user_id=user_id, rights='1110')
                     await storage.update_object(name=object_name, owner_id=target_user_id)
                     print(f"Вы успешно передали права собственности на объект {object_name} пользователю {target_user}")
-
 
 
 async def get_rights(user: str) -> None:
